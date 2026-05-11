@@ -1,0 +1,318 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); }
+.tabs { display: flex; gap: 4px; border-bottom: 0.5px solid var(--color-border-tertiary); margin-bottom: 1.5rem; padding: 1rem 1rem 0; }
+.tab { padding: 8px 16px; font-size: 13px; cursor: pointer; border: 0.5px solid transparent; border-bottom: none; border-radius: 6px 6px 0 0; color: var(--color-text-secondary); background: transparent; }
+.tab.active { background: var(--color-background-primary); border-color: var(--color-border-tertiary); color: var(--color-text-primary); font-weight: 500; }
+.panel { display: none; padding: 0 1rem 1.5rem; }
+.panel.active { display: block; }
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 1.5rem; }
+.kpi { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 12px 14px; }
+.kpi-label { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 4px; }
+.kpi-val { font-size: 22px; font-weight: 500; color: var(--color-text-primary); }
+.kpi-sub { font-size: 11px; color: var(--color-text-tertiary); margin-top: 2px; }
+.chart-wrap { position: relative; width: 100%; }
+.section-title { font-size: 14px; font-weight: 500; color: var(--color-text-secondary); margin: 1.2rem 0 0.6rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 500; }
+.badge-green { background: #EAF3DE; color: #3B6D11; }
+.badge-red { background: #FCEBEB; color: #A32D2D; }
+.badge-amber { background: #FAEEDA; color: #854F0B; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; font-size: 11px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.04em; padding: 6px 8px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+td { padding: 7px 8px; border-bottom: 0.5px solid var(--color-border-tertiary); color: var(--color-text-primary); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+.progress-bar { height: 6px; background: var(--color-background-tertiary); border-radius: 3px; overflow: hidden; min-width: 60px; }
+.progress-fill { height: 100%; border-radius: 3px; }
+.ai-box { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem; margin-top: 1rem; }
+.ai-msg { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: 8px; padding: 10px 14px; font-size: 13px; line-height: 1.6; color: var(--color-text-primary); margin-top: 0.5rem; min-height: 80px; white-space: pre-wrap; }
+.chip { display: inline-block; font-size: 12px; padding: 4px 10px; border: 0.5px solid var(--color-border-secondary); border-radius: 12px; cursor: pointer; color: var(--color-text-secondary); margin: 3px; background: var(--color-background-primary); }
+.chip:hover { background: var(--color-background-secondary); }
+.ai-input-row { display: flex; gap: 8px; margin-top: 8px; }
+.ai-input-row input { flex: 1; font-size: 13px; }
+.ai-input-row button { font-size: 13px; white-space: nowrap; }
+.loading-dot { display: inline-block; animation: blink 1s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+.slide-box { background: #0e1a2e; border-radius: var(--border-radius-lg); padding: 1.5rem; color: #fff; }
+.slide-box .slide-title { font-size: 18px; font-weight: 500; color: #fff; margin-bottom: 4px; }
+.slide-box .slide-sub { font-size: 13px; color: rgba(255,255,255,0.55); margin-bottom: 1.5rem; }
+.slide-3col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+.slide-card { background: rgba(255,255,255,0.07); border: 0.5px solid rgba(255,255,255,0.15); border-radius: 10px; padding: 14px; }
+.slide-card .sc-label { font-size: 11px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+.slide-card .sc-val { font-size: 24px; font-weight: 500; color: #fff; }
+.slide-card .sc-sub { font-size: 12px; color: rgba(255,255,255,0.55); margin-top: 4px; }
+.slide-card .sc-action { font-size: 12px; color: #FF6B4A; margin-top: 8px; font-weight: 500; }
+.slide-bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 12px; color: rgba(255,255,255,0.7); }
+.slide-bar-bg { flex: 1; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; }
+.slide-bar-fill { height: 100%; border-radius: 3px; background: #4A9EFF; }
+.slide-bar-fill.red { background: #FF6B4A; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+</style>
+
+<h2 class="sr-only">Dashboard Bold — Analista comercial: Bavaria (transacciones), SMB (segmentación ejecutivos) y herramienta IA para Team Leads</h2>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('bavaria')"><i class="ti ti-building-factory" aria-hidden="true"></i> P2 · Bavaria</button>
+  <button class="tab" onclick="showTab('smb')"><i class="ti ti-chart-bar" aria-hidden="true"></i> P3 · Dashboard SMB</button>
+  <button class="tab" onclick="showTab('ai')"><i class="ti ti-robot" aria-hidden="true"></i> P4 · IA Team Leads</button>
+  <button class="tab" onclick="showTab('slide')"><i class="ti ti-presentation" aria-hidden="true"></i> P5 · Slide JD</button>
+</div>
+
+<div id="tab-bavaria" class="panel active">
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-label">TPV total (9 días)</div><div class="kpi-val">$1.94B</div><div class="kpi-sub">COP · Bavaria</div></div>
+    <div class="kpi"><div class="kpi-label">TRX aprobadas</div><div class="kpi-val">19,357</div><div class="kpi-sub">de 20,419 totales</div></div>
+    <div class="kpi"><div class="kpi-label">Tasa aprobación</div><div class="kpi-val">94.8%</div><div class="kpi-sub">Benchmark fintech: ~90%</div></div>
+    <div class="kpi"><div class="kpi-label">Ticket promedio</div><div class="kpi-val">$100K</div><div class="kpi-sub">COP por transacción</div></div>
+    <div class="kpi"><div class="kpi-label">Merchants activos</div><div class="kpi-val">30</div><div class="kpi-sub">1 concentra 43% del TPV</div></div>
+  </div>
+  <div class="two-col">
+    <div>
+      <p class="section-title">TPV diario (COP MM)</p>
+      <div class="chart-wrap" style="height:180px"><canvas id="c-daily" role="img" aria-label="TPV diario Bavaria del 1 al 9 de abril 2026. Pico el 5 de abril con 337M COP. Caída los fines de semana.">TPV por día: Apr 1: 255M, Apr 2: 246M, Apr 3: 210M, Apr 4: 315M, Apr 5: 337M, Apr 6: 128M, Apr 7: 147M, Apr 8: 144M, Apr 9: 154M.</canvas></div>
+    </div>
+    <div>
+      <p class="section-title">Mix método de pago (TRX)</p>
+      <div class="chart-wrap" style="height:180px"><canvas id="c-metodo" role="img" aria-label="Débito 66.5%, Crédito 26.3%, QR Bold 7.2%, Nequi 0.01%">Débito 66.5%, Crédito 26.3%, QR Bold 7.2%, Nequi 0%.</canvas></div>
+    </div>
+  </div>
+  <p class="section-title">Top merchants por TPV (Apr 1–9)</p>
+  <table>
+    <tr><th>Merchant ID</th><th>TRX</th><th>TPV (COP MM)</th><th>Ticket prom</th><th>% del total</th></tr>
+    <tr><td style="font-family:var(--font-mono);font-size:12px">4M2O6VLH9I</td><td>7,553</td><td>$829M</td><td>$110K</td><td><div style="display:flex;align-items:center;gap:6px"><div class="progress-bar" style="width:80px"><div class="progress-fill" style="width:43%;background:#185FA5"></div></div><span>43%</span></div></td></tr>
+    <tr><td style="font-family:var(--font-mono);font-size:12px">H4Y5AGH0FR</td><td>2,102</td><td>$178M</td><td>$85K</td><td><div style="display:flex;align-items:center;gap:6px"><div class="progress-bar" style="width:80px"><div class="progress-fill" style="width:9%;background:#378ADD"></div></div><span>9%</span></div></td></tr>
+    <tr><td style="font-family:var(--font-mono);font-size:12px">UP7X07KY9P</td><td>990</td><td>$131M</td><td>$132K</td><td><div style="display:flex;align-items:center;gap:6px"><div class="progress-bar" style="width:80px"><div class="progress-fill" style="width:7%;background:#85B7EB"></div></div><span>7%</span></div></td></tr>
+    <tr><td style="font-family:var(--font-mono);font-size:12px">JVGLF7F4WH</td><td>990</td><td>$123M</td><td>$124K</td><td><div style="display:flex;align-items:center;gap:6px"><div class="progress-bar" style="width:80px"><div class="progress-fill" style="width:6%;background:#85B7EB"></div></div><span>6%</span></div></td></tr>
+    <tr><td style="font-family:var(--font-mono);font-size:12px">B345I7Y21T</td><td>710</td><td>$84M</td><td>$118K</td><td><div style="display:flex;align-items:center;gap:6px"><div class="progress-bar" style="width:80px"><div class="progress-fill" style="width:4%;background:#B5D4F4"></div></div><span>4%</span></div></td></tr>
+  </table>
+  <div style="margin-top:1rem;padding:10px 14px;background:var(--color-background-secondary);border-radius:8px;font-size:12px;color:var(--color-text-secondary);border-left:3px solid #185FA5">
+    <strong style="color:var(--color-text-primary)">Alerta de concentración:</strong> El merchant 4M2O6VLH9I concentra el 43% del TPV. Riesgo operativo alto — Bavaria debería diversificar la adopción entre los 30 camioneros restantes.
+  </div>
+</div>
+
+<div id="tab-smb" class="panel">
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-label">Clientes totales</div><div class="kpi-val">759</div><div class="kpi-sub">150 ejecutivos</div></div>
+    <div class="kpi"><div class="kpi-label">En segmento target</div><div class="kpi-val" style="color:#3B6D11">89</div><div class="kpi-sub">$20M–$200M TPV · 11.7%</div></div>
+    <div class="kpi"><div class="kpi-label">Clientes "basura"</div><div class="kpi-val" style="color:#A32D2D">664</div><div class="kpi-sub">< $20M TPV · 87.5%</div></div>
+    <div class="kpi"><div class="kpi-label">TPV promedio</div><div class="kpi-val">$9.9M</div><div class="kpi-sub">Meta mínima: $20M</div></div>
+    <div class="kpi"><div class="kpi-label">Mejor TL</div><div class="kpi-val">TL 6</div><div class="kpi-sub">22.4% en target</div></div>
+  </div>
+  <div class="two-col">
+    <div>
+      <p class="section-title">Distribución por segmento (clientes)</p>
+      <div class="chart-wrap" style="height:200px"><canvas id="c-segmento" role="img" aria-label="664 clientes basura menos de 20M, 89 en target 20 a 200M, 2 grandes más de 200M">Basura 664, Target 89, Grande 2.</canvas></div>
+    </div>
+    <div>
+      <p class="section-title">% en target por team lead</p>
+      <div class="chart-wrap" style="height:200px"><canvas id="c-tl" role="img" aria-label="TL 6 lidera con 22.4%, TL 3 TL 7 TL 8 en 0%">TL6 22.4%, TL9 22.3%, TL12 20.9%, resto menor a 13%.</canvas></div>
+    </div>
+  </div>
+  <p class="section-title">Cuadrante ejecutivos — volumen vs calidad</p>
+  <div style="margin-bottom:6px;font-size:12px;color:var(--color-text-secondary)">Cada punto = un ejecutivo. Eje X: clientes totales. Eje Y: % en target ($20M–$200M).</div>
+  <div class="chart-wrap" style="height:260px"><canvas id="c-scatter" role="img" aria-label="Scatter plot de ejecutivos SMB por volumen y porcentaje en target">Ejecutivos distribuidos entre 0 y 54% target, y 1 a 11 clientes totales.</canvas></div>
+  <div style="display:flex;gap:10px;margin-top:8px;font-size:12px;flex-wrap:wrap">
+    <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:50%;background:#639922;display:inline-block"></span> ≥30% target (estrella)</span>
+    <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:50%;background:#378ADD;display:inline-block"></span> 10–29% target</span>
+    <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:50%;background:#E24B4A;display:inline-block"></span> <10% target (riesgo)</span>
+  </div>
+  <p class="section-title" style="margin-top:1.2rem">Top 10 ejecutivos por % en target</p>
+  <table>
+    <tr><th>Ejecutivo</th><th>Team Lead</th><th>Clientes</th><th>En target</th><th>% target</th><th>TPV prom</th></tr>
+    <tr><td>ejecutivo 89</td><td>TL 12</td><td>1</td><td>1</td><td><span class="badge badge-green">100%</span></td><td>$20.9M</td></tr>
+    <tr><td>ejecutivo 87</td><td>TL 6</td><td>1</td><td>1</td><td><span class="badge badge-green">100%</span></td><td>$27.8M</td></tr>
+    <tr><td>ejecutivo 95</td><td>TL 6</td><td>3</td><td>2</td><td><span class="badge badge-green">66.7%</span></td><td>$32.2M</td></tr>
+    <tr><td>ejecutivo 69</td><td>TL 5</td><td>3</td><td>2</td><td><span class="badge badge-green">66.7%</span></td><td>$19.7M</td></tr>
+    <tr><td>ejecutivo 90</td><td>TL 9</td><td>11</td><td>6</td><td><span class="badge badge-green">54.5%</span></td><td>$43.4M</td></tr>
+    <tr><td>ejecutivo 9</td><td>TL 6</td><td>2</td><td>1</td><td><span class="badge badge-amber">50%</span></td><td>$46.8M</td></tr>
+    <tr><td>ejecutivo 17</td><td>TL 6</td><td>4</td><td>2</td><td><span class="badge badge-amber">50%</span></td><td>$42.6M</td></tr>
+    <tr><td>ejecutivo 11</td><td>TL 9</td><td>6</td><td>3</td><td><span class="badge badge-amber">50%</span></td><td>$34.1M</td></tr>
+    <tr><td>ejecutivo 13</td><td>TL 9</td><td>10</td><td>4</td><td><span class="badge badge-amber">40%</span></td><td>$16.0M</td></tr>
+    <tr><td>ejecutivo 113</td><td>TL 12</td><td>7</td><td>3</td><td><span class="badge badge-amber">40%</span></td><td>$40.6M</td></tr>
+  </table>
+</div>
+
+<div id="tab-ai" class="panel">
+  <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:1rem;padding:10px 14px;background:var(--color-background-secondary);border-radius:8px;border-left:3px solid #7F77DD">
+    <strong style="color:var(--color-text-primary)">Herramienta IA para Team Leads</strong> — Consulta la base SMB con lenguaje natural. Powered by Claude API + datos reales de Base 2.
+  </div>
+  <p style="font-size:12px;color:var(--color-text-secondary);margin-bottom:8px">Preguntas sugeridas:</p>
+  <div>
+    <span class="chip" onclick="setQ('¿Qué ejecutivos del TL 6 tienen más del 40% de clientes en target?')">TL 6 ejecutivos estrella</span>
+    <span class="chip" onclick="setQ('¿Cuáles son los 5 clientes con mayor TPV en todo el equipo?')">Top 5 clientes por TPV</span>
+    <span class="chip" onclick="setQ('¿Qué team leads tienen 0% de clientes en target? ¿Cuántos clientes manejan?')">TLs con 0% target</span>
+    <span class="chip" onclick="setQ('¿Qué categorías de negocio tienen mejor TPV promedio?')">Mejores categorías</span>
+    <span class="chip" onclick="setQ('Dame un resumen ejecutivo del equipo SMB para presentar a gerencia')">Resumen ejecutivo</span>
+    <span class="chip" onclick="setQ('¿Qué ejecutivos tienen más de 5 clientes pero menos del 20% en target?')">Volumen sin calidad</span>
+  </div>
+  <div class="ai-input-row">
+    <input type="text" id="ai-q" placeholder="Escribe tu pregunta sobre el equipo SMB..." />
+    <button onclick="askAI()"><i class="ti ti-send" aria-hidden="true"></i> Consultar ↗</button>
+  </div>
+  <div class="ai-box">
+    <div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em">Respuesta del analista IA</div>
+    <div class="ai-msg" id="ai-resp">Haz una pregunta sobre el equipo SMB para obtener un análisis instantáneo.</div>
+  </div>
+  <div style="margin-top:1rem;padding:10px 14px;background:var(--color-background-secondary);border-radius:8px;font-size:12px;color:var(--color-text-secondary)">
+    <strong style="color:var(--color-text-primary)">Prompt de sistema utilizado:</strong><br>
+    <span style="font-family:var(--font-mono);font-size:11px;color:var(--color-text-secondary)">"Eres un analista comercial de Bold. Tienes los datos del equipo SMB: 759 comercios con TPV m0, segmento (&lt;20M basura / 20-200M target / &gt;200M), ejecutivo, team lead y manager. Responde en español, con números exactos del dataset, en máximo 4 oraciones. Sé directo y accionable."</span>
+  </div>
+</div>
+
+<div id="tab-slide" class="panel">
+  <div class="slide-box">
+    <div class="slide-title">Equipo SMB — diagnóstico y palanca de crecimiento</div>
+    <div class="slide-sub">Bold · Junta directiva · Mayo 2026 · 1 minuto</div>
+    <div class="slide-3col">
+      <div class="slide-card">
+        <div class="sc-label">Situación hoy</div>
+        <div class="sc-val">759</div>
+        <div class="sc-sub">comercios vinculados<br>150 ejecutivos activos</div>
+        <div style="margin-top:12px">
+          <div class="slide-bar-row"><span style="width:80px">Basura &lt;20M</span><div class="slide-bar-bg"><div class="slide-bar-fill red" style="width:87%"></div></div><span>87%</span></div>
+          <div class="slide-bar-row"><span style="width:80px">Target 20-200M</span><div class="slide-bar-bg"><div class="slide-bar-fill" style="width:12%"></div></div><span>12%</span></div>
+          <div class="slide-bar-row"><span style="width:80px">Grande &gt;200M</span><div class="slide-bar-bg"><div class="slide-bar-fill" style="width:0.5%"></div></div><span>0.3%</span></div>
+        </div>
+      </div>
+      <div class="slide-card">
+        <div class="sc-label">Problema central</div>
+        <div class="sc-val" style="color:#FF6B4A">$9.9M</div>
+        <div class="sc-sub">TPV promedio por cliente<br>Meta mínima: $20M</div>
+        <div style="margin-top:10px;font-size:12px;color:rgba(255,255,255,0.6);line-height:1.5">
+          3 de 15 Team Leads tienen 0% de clientes en target. TL 6 y TL 9 lideran con ~22% — el modelo de gestión funciona, pero no está siendo replicado.
+        </div>
+      </div>
+      <div class="slide-card">
+        <div class="sc-label">Acciones propuestas</div>
+        <div class="sc-val" style="color:#4A9EFF">2</div>
+        <div class="sc-sub">palancas de impacto inmediato</div>
+        <div class="sc-action">① Dashboard de calidad de clientes en tiempo real para el gerente SMB</div>
+        <div class="sc-action" style="margin-top:6px">② Herramienta IA por Team Lead — consulta de datos sin depender del área de analytics</div>
+      </div>
+    </div>
+    <div style="margin-top:1rem;padding:10px 14px;background:rgba(255,255,255,0.05);border-radius:8px;font-size:12px;color:rgba(255,255,255,0.65);border-left:3px solid #4A9EFF">
+      <strong style="color:#fff">Proyección:</strong> Si el 30% de los 664 clientes "basura" migran al segmento target en los próximos 6 meses (mediante reentrenamiento de criterio de calificación de leads), el TPV mensual del canal SMB crece ~3x sin necesidad de contratar más ejecutivos.
+    </div>
+  </div>
+  <div style="margin-top:1rem;padding:12px 14px;background:var(--color-background-secondary);border-radius:8px;font-size:13px;color:var(--color-text-secondary);line-height:1.7">
+    <strong style="color:var(--color-text-primary)">Guión 1 minuto:</strong> "Tenemos 759 comercios vinculados pero el 87% no está en el segmento que genera valor real para Bold. El problema no es volumen — es calidad. El TPV promedio es $9.9M, menos de la mitad del mínimo. Tres team leads tienen 0% en target. La solución que propongo tiene dos componentes ya desarrollados: un dashboard en tiempo real para que el gerente identifique en 5 segundos quién cumple y quién no, y una herramienta de IA que permite a cada team lead hacer preguntas sobre su equipo sin esperar reportes. Con esto podemos reorientar el esfuerzo comercial en menos de 30 días."
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+function showTab(t) {
+  document.querySelectorAll('.tab').forEach((b,i)=>{ b.classList.toggle('active', ['bavaria','smb','ai','slide'][i]===t); });
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+t).classList.add('active');
+  if(t==='smb' && !window._smbChartsDone) { buildSMBCharts(); window._smbChartsDone=true; }
+}
+
+const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
+const gridColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+const textColor = isDark ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.45)';
+
+const dailyLabels = ['Apr 1','Apr 2','Apr 3','Apr 4','Apr 5','Apr 6','Apr 7','Apr 8','Apr 9'];
+const dailyTPV = [255,246,210,315,337,128,147,144,154];
+
+new Chart(document.getElementById('c-daily'), {
+  type:'bar',
+  data:{ labels:dailyLabels, datasets:[{
+    label:'TPV (MM COP)', data:dailyTPV,
+    backgroundColor: dailyTPV.map(v=>v===337?'#185FA5':v<150?'#E24B4A':'#378ADD'),
+    borderRadius:4, borderSkipped:false
+  }]},
+  options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>'$'+c.parsed.y+'M COP'}}}, scales:{ x:{ticks:{color:textColor,font:{size:11}},grid:{display:false}}, y:{ticks:{color:textColor,font:{size:11},callback:v=>v+'M'},grid:{color:gridColor}} } }
+});
+
+new Chart(document.getElementById('c-metodo'), {
+  type:'doughnut',
+  data:{ labels:['Débito','Crédito','QR Bold','Nequi'], datasets:[{data:[66.5,26.3,7.2,0.01], backgroundColor:['#185FA5','#378ADD','#85B7EB','#B5D4F4'], borderWidth:0 }]},
+  options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:true, position:'right', labels:{color:textColor,font:{size:11},boxWidth:10,padding:8} }, tooltip:{callbacks:{label:c=>c.label+': '+c.parsed+'%'}} } }
+});
+
+function buildSMBCharts() {
+  new Chart(document.getElementById('c-segmento'), {
+    type:'bar',
+    data:{ labels:['< $20M\n(basura)','$20M–$200M\n(target)','> $200M\n(grande)'], datasets:[{ label:'Clientes', data:[664,89,2], backgroundColor:['#E24B4A','#639922','#378ADD'], borderRadius:4 }]},
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>c.parsed.y+' clientes'}}}, scales:{ x:{ticks:{color:textColor,font:{size:11},maxRotation:0},grid:{display:false}}, y:{ticks:{color:textColor,font:{size:11}},grid:{color:gridColor}} } }
+  });
+
+  const tlLabels = ['TL 6','TL 9','TL 12','TL 11','TL 14','TL 10','TL 2','TL 15','TL 13','TL 1','TL 5','TL 4','TL 3','TL 7','TL 8'];
+  const tlVals = [22.4,22.3,20.9,12.0,10.6,9.1,8.9,8.3,7.8,7.4,7.4,5.1,0,0,0];
+  new Chart(document.getElementById('c-tl'), {
+    type:'bar',
+    data:{ labels:tlLabels, datasets:[{ label:'% target', data:tlVals, backgroundColor:tlVals.map(v=>v>=20?'#639922':v>=10?'#378ADD':'#E24B4A'), borderRadius:4 }]},
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>c.parsed.x+'%'}}}, scales:{ x:{ticks:{color:textColor,font:{size:10},callback:v=>v+'%'},grid:{color:gridColor},max:30}, y:{ticks:{color:textColor,font:{size:10}},grid:{display:false}} } }
+  });
+
+  const agents = [
+    {x:1,y:100,label:'ej 89'},{x:1,y:100,label:'ej 87'},{x:3,y:66.7,label:'ej 95'},{x:3,y:66.7,label:'ej 69'},
+    {x:11,y:54.5,label:'ej 90'},{x:2,y:50,label:'ej 9'},{x:4,y:50,label:'ej 17'},{x:6,y:50,label:'ej 11'},
+    {x:10,y:40,label:'ej 13'},{x:7,y:42.9,label:'ej 131'},{x:7,y:42.9,label:'ej 113'},{x:5,y:40,label:'ej 64'},
+    {x:5,y:40,label:'ej 80'},{x:5,y:40,label:'ej 103'},{x:3,y:33.3,label:'ej 26'},{x:4,y:25,label:'ej 78'},
+    {x:8,y:25,label:'ej 1'},{x:12,y:25,label:'ej 2'},{x:15,y:13.3,label:'ej 3'},{x:20,y:10,label:'ej 4'},
+    {x:25,y:8,label:'ej 5'},{x:30,y:6.7,label:'ej 6'},{x:18,y:5.6,label:'ej 7'},{x:10,y:0,label:'ej 8'},
+    {x:5,y:0,label:'ej 20'},{x:3,y:0,label:'ej 21'},{x:2,y:0,label:'ej 22'},{x:1,y:0,label:'ej 23'}
+  ];
+  new Chart(document.getElementById('c-scatter'), {
+    type:'scatter',
+    data:{ datasets:[{
+      label:'Ejecutivos', data:agents,
+      pointBackgroundColor: agents.map(d=>d.y>=30?'#639922':d.y>=10?'#378ADD':'#E24B4A'),
+      pointRadius:7, pointHoverRadius:9
+    }]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{callbacks:{label:d=>d.raw.label+' — '+d.raw.x+' clientes, '+d.raw.y+'% target'}} },
+      scales:{
+        x:{ title:{display:true,text:'Clientes totales',color:textColor,font:{size:11}}, ticks:{color:textColor,font:{size:10}}, grid:{color:gridColor}, min:0, max:35 },
+        y:{ title:{display:true,text:'% en target',color:textColor,font:{size:11}}, ticks:{color:textColor,font:{size:10},callback:v=>v+'%'}, grid:{color:gridColor}, min:-5, max:110 }
+      }
+    }
+  });
+}
+
+function setQ(q) { document.getElementById('ai-q').value=q; }
+
+const SMB_DATA_SUMMARY = `
+DATOS EQUIPO SMB BOLD (Base 2 real):
+- Total clientes: 759 | Ejecutivos: 133 | Team Leads: 15 | Managers: 7
+- Segmentación por TPV m0: <20M (basura): 664 (87.5%) | 20-200M (target): 89 (11.7%) | >200M: 2 (0.3%)
+- TPV promedio: $9.9M COP | Meta mínima: $20M
+- Top TL por % target: TL6 22.4% (49 clientes), TL9 22.3% (103), TL12 20.9% (43)
+- TLs con 0% target: TL3 (3 clientes), TL7 (1), TL8 (4)
+- Mejor ejecutivo por volumen+calidad: ejecutivo 90 (TL9): 11 clientes, 6 en target (54.5%), TPV prom $43.4M
+- Ejecutivos 100% target (bajo volumen): ej89 y ej87 (1 cliente cada uno)
+- Top categorías: FOOD_AND_DRINK 341, RETAIL_TRADE 182, SERVICES 107
+- Top ciudades: Bogotá 268, Medellín 71, Cali 55, Barranquilla 51
+- Managers: Manager2 16.4% target (171 clientes), Manager7 13.4% (149), Manager6 11.8% (102)
+- Managers críticos: Manager3 0%, Manager4 0%
+`;
+
+async function askAI() {
+  const q = document.getElementById('ai-q').value.trim();
+  if(!q) return;
+  const resp = document.getElementById('ai-resp');
+  resp.innerHTML = '<span class="loading-dot">●</span><span class="loading-dot" style="animation-delay:0.2s">●</span><span class="loading-dot" style="animation-delay:0.4s">●</span> Analizando datos SMB...';
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system:`Eres un analista comercial senior de Bold con acceso a los datos del equipo SMB. Tienes este resumen de datos reales:\n\n${SMB_DATA_SUMMARY}\n\nResponde en español. Sé directo, usa números exactos del dataset. Máximo 5 oraciones. Termina siempre con una recomendación accionable concreta para el team lead.`,
+        messages:[{role:'user',content:q}]
+      })
+    });
+    const data = await res.json();
+    resp.textContent = data.content?.[0]?.text || 'Sin respuesta del modelo.';
+  } catch(e) {
+    resp.textContent = 'Error conectando con la API. Verifica la conexión.';
+  }
+}
+
+document.getElementById('ai-q').addEventListener('keydown', e=>{ if(e.key==='Enter') askAI(); });
+</script>
